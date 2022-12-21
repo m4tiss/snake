@@ -1,0 +1,93 @@
+#include "snake.h"
+#include "screen.h"
+#include "winsys.h"
+#include "cpoint.h"
+
+
+CSnake::CSnake(CRect r, char _c /*=' '*/):
+  CFramedWindow(r, _c)
+{
+}
+	void CSnake::draw_menu(){
+		int x=geom.topleft.x;
+		int y=geom.topleft.y;
+		gotoyx(y+4,x+4);
+		printl("h - toggle help information");
+		gotoyx(y+5,x+4);
+		printl("p - toggle pause/play mode");
+		gotoyx(y+6,x+4);
+		printl("r - restart game");
+		gotoyx(y+7,x+4);
+		printl("arrows - move snake (in play mode) or");
+		gotoyx(y+8,x+13);
+		printl("move window (in pause mode)");
+		}
+	void CSnake::init_snake(){
+		int x=geom.topleft.x;
+		int y=geom.topleft.y;
+		body.push_back(CPoint(4,2));
+		body.push_back(CPoint(3,2));
+		body.push_back(CPoint(2,2));
+		}
+	void CSnake::paint_snake(){
+		int x=geom.topleft.x;
+		int y=geom.topleft.y;
+		for(int i = 1;i < body.size();i++){
+			gotoyx(body[i].y+y,body[i].x+x);
+			printc('+');
+			}
+		gotoyx(body[0].y+y,body[0].x+x);
+		printc('*');
+		}
+	bool CSnake::move(){
+		if(pause==1)return false;
+		
+		for(int i = body.size()-1;i>0;i--){
+			body[i]=body[i-1];
+			}
+		if(clicked_key == KEY_UP){
+			body[0]+=CPoint(0,-1);
+			}
+			else if(clicked_key == KEY_DOWN){
+				body[0]+=CPoint(0,1);
+				}
+				else if(clicked_key == KEY_LEFT){
+				body[0]+=CPoint(-1,0);
+				}
+				else if(clicked_key == KEY_RIGHT){
+				body[0]+=CPoint(1,0);
+				}
+		return true;
+		}
+	bool CSnake::handleEvent(int key){
+		if(pause == 1)return false;
+		if(key == 'h'){
+			pause = 0;
+			return true;
+			}
+		if(key == KEY_RIGHT || key == KEY_UP || key == KEY_DOWN || key == KEY_LEFT){
+			clicked_key = key;
+			}
+			return true;
+		}
+	void CSnake::paint(){
+		CFramedWindow::paint();
+		if(menu==1){
+			if(init==0){
+				init_snake();
+				init=1;
+				}
+			draw_menu();
+			paint_snake();
+			}
+		int x=geom.topleft.x;
+		int y=geom.topleft.y;
+		gotoyx(y-1,x);
+		printl("| Level: %d |",level);
+		if(pause == 0){
+			move();
+			paint_snake();
+			}
+		
+		
+		}
